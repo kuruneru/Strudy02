@@ -27,7 +27,213 @@
 
   \maketitle
 
-	\begin{thebibliography}{99}
+  \section{Study02.java}
 
+  \subsection{ソースコード}
+
+  \begin{lstlisting}[caption=Study02.java, label=code:in, language=Java]
+    import java.util.Scanner;
+
+    class Study02 {
+      public static void main(String[] args) {
+
+        /* このファイルで使う変数宣言 */
+        Scanner scan = new Scanner(System.in);
+        int money;
+
+        /* 飲み物のインスタンス化 */
+        Drink drink1 = new Drink("ソーダ", 130);
+        Drink drink2 = new Drink("コーラ", 130);
+        Drink drink3 = new Drink("天然水", 100);
+        Drink drink5 = new Drink("玄米茶", 120);
+
+        /* 自動販売機のクラスのインスタンス化 */
+        VendingMachine venmach = new VendingMachine();
+
+        /* 登録の処理 */
+        venmach.registDrink(1, drink1, 1);
+        venmach.registDrink(1, drink2, 4);
+        venmach.registDrink(2, drink2, 2);
+        venmach.registDrink(3, drink3, 5);
+        venmach.registDrink(5, drink5, 2);
+
+        /* ターミナルの見やすくするための改行 */
+        System.out.println();
+
+        venmach.printInfo();
+        
+        /* ターミナルの見やすくするための改行 */
+        System.out.println();
+        venmach.insertMoney(0);
+
+        System.out.println();
+
+        while(true) {
+          System.out.println("行いたい操作を指定してください");
+          System.out.print("（1: お金の投入，2: 飲み物の購入，3: お釣りの返却，4: 終了 > ");
+          switch (scan.nextInt()) {
+            case 1 -> { /* お金の投入 */
+              System.out.print("投入する金額を指定してください > ");
+              money = scan.nextInt();
+              System.out.println(money + "円を投入しました");
+              venmach.insertMoney(money);
+            }
+
+            case 2 -> { /* 飲み物の購入 */
+              System.out.print("購入する飲み物の番号を指定してください > ");
+              venmach.buyDrink(scan.nextInt());
+              System.out.println();
+              venmach.printInfo();
+              venmach.insertMoney(0);
+            }
+
+            case 3 -> { /* お釣りの返却 */
+              venmach.returnMoney();
+            }
+
+            case 4 -> { /* 終了 */
+              return;
+            }
+
+            default -> {
+              System.out.println("1~4の数字の中から選択してください");
+            }
+
+          }
+
+          System.out.println();
+        }
+      }
+    }
+  \end{lstlisting}
+
+  \subsection{工夫した点}
+  具体的に工夫した点は2つある．それを以下に記す．
+  \begin{enumerate}[(1). ]
+    \item Scannerを最初に定義しておき，次から使う際に長ったらしくScannerについて記述しなくて良くなった点だ．これにより，文字列や数字を取得するプログラムを書く際に，1行が極端に長くなるのを避けている．
+    \item インスタンス化を行ったときはそれぞれコメントで明記し，今扱っているものが変数がインスタンス化した他のクラスなのかをわかるようにした．
+  \end{enumerate}
+
+  \newpage
+
+  \section{Drink.java}
+
+  \subsection{ソースコード}
+
+  \begin{lstlisting}[caption=Drink.java, label=code:in, language=Java]
+    class Drink {
+
+      private String name;
+      private int price;
+
+      /* (コンストラクタ)nameで名前を指定し，priceで値段を指定する */
+      public Drink(String name, int price) {
+        this.name = name;
+        this.price = price;
+      }
+
+      /* 飲み物の名前を返す */
+      public String getName() {
+        return this.name;
+      }
+
+      /* 飲み物の値段を返す */
+      public int getPrice() {
+        return this.price;
+      }
+    }
+  \end{lstlisting}
+
+  \subsection{工夫した点}
+  工夫した点は1つある．それは以下である．
+  \begin{enumerate}[(1). ]
+    \item コンストラクタ，getterについて，その内容を深く記した．これにより，Drinkを簡単に扱えるようになった．
+  \end{enumerate}
+
+  \newpage
+
+  \section{VendingMachine.java}
+
+  \subsection{ソースコード}
+
+  \begin{lstlisting}[caption=VendingMachine.java, label=code:in, language=Java]
+    class VendingMachine {
+      int money = 0;
+      /* 売り切れ状態と未登録状態を区別するために配列の要素全てに-1のフラグを建てる */
+      int[] stock_array = {-1, -1, -1, -1, -1};
+      Drink[] drink_array = new Drink[5];
+
+      /* 自動販売機に登録する処理 */
+      public void registDrink(int index, Drink drink, int stock) {
+        if (this.stock_array[index - 1] == -1) {
+          this.stock_array[index - 1] = stock;
+          this.drink_array[index - 1] = drink;
+          System.out.println(index + "番に「" + drink.getName() + "」を" + this.stock_array[index - 1] + "個登録しました");
+        } else {
+          System.out.println(index + "番にはすでに飲みものが登録されています");
+        }
+      }
+
+      /* 現在投入されている金額の表示 */
+      public void insertMoney(int money) {
+        System.out.println("現在" + (this.money += money) + "円入っています");
+      }
+
+      /* 仕様書閲覧(購入の処理) */
+      public void buyDrink(int index) {
+      /* 購入失敗の場合 */
+        /* 未登録の場合 */
+        if (this.stock_array[index - 1] == -1) {
+          System.out.println("購入できませんでした(" + index + "番には飲み物が登録されていません)");
+        /* 売り切れの場合 */
+        } else if (this.stock_array[index - 1] == 0) {
+          System.out.println("購入できませんでした(売り切れています)");
+        /* 金額が足りない場合 */
+        } else if (this.drink_array[index - 1].getPrice() > this.money) {
+          System.out.println("購入できませんでした(お金が足りません)");
+        }
+      /* 購入可能な場合 */
+        else {
+          this.money -= this.drink_array[index - 1].getPrice();
+          this.stock_array[index - 1]--;
+          System.out.println(index + "番の「" + drink_array[index - 1].getName() +"」を購入しました");
+        }
+      }
+
+      /* 釣りの返却，投入金額を0に，お釣りの出力 */
+      public void returnMoney() {
+        System.out.println(this.money + "円のお釣りを出力しました");
+        this.money = 0;
+      }
+
+      /* 登録されている飲みのもの情報と売り切れの表示 */
+      public void printInfo() {
+        System.out.println("===================================");
+        for (int i = 0; i < 5; i++) {
+          if (stock_array[i] > 0) {
+            /* 個数が1以上のとき */
+            System.out.println((i + 1) + "番 " + this.drink_array[i].getName() + " " + this.drink_array[i].getPrice() + "円 " + this.stock_array[i] + "個");
+          } else if (stock_array[i] == 0) {
+            /* 個数がゼロのとき(売切の場合) */
+            System.out.println((i + 1) + "番 " + this.drink_array[i].getName() + " " + this.drink_array[i].getPrice() + "円 " + "売切");
+          } else {
+            /* 個数が-1のとき(未登録のとき) */
+            System.out.println("-----未登録-----");
+          }
+        }
+        System.out.println("===================================");
+      }
+    }
+  \end{lstlisting}
+
+  \subsection{工夫した点}
+  工夫した点は2つある．それを以下に記す．
+  \begin{enumerate}[(1). ]
+    \item 初期，stock\_arrayを定義する際，その配列全てに$-1$のフラグを立てることにより，未登録と在庫切れを判別できるようにした．このプログラムならば$-1$の状態は未登録であり，$0$の状態は在庫切れを表せるようになっている．
+    \item 購入失敗のif分について，しっかり何が原因で購入できないのかをコメントをつけて場合分けしていることによって，視覚的に判断できるようになっている．
+  \end{enumerate}
+	\begin{thebibliography}{99}
+    \bibitem{text} 中山清喬，国元大悟，「スッキリわかるJava入門 第4版」，株式会社インプレス，2024年 11月1日
+    \bibitem{MEIKAI} 柴田望洋，「新・明解 Java入門」，SBクリエイティブ株式会社，2019年 9月6日
 	\end{thebibliography}
 \end{document}
